@@ -7,7 +7,11 @@ const searchForm = document.querySelector('.search-form');
 const searchInput = document.querySelector('input');
 const gallery = document.querySelector('.gallery');
 const loader = document.querySelector('.loader');
+
 let buttonLoadMore = document.querySelector('.load-more');
+let searchValue = '';
+let page = 1;
+let totalImages = 0;
 
 const lightbox = new SimpleLightbox('.gallery a', {
   captionsData: 'alt',
@@ -21,7 +25,7 @@ function notifyFailure(message) {
   Notify.failure(message);
 }
 
-async function Images(event) {
+async function imagesSearch(event) {
   event.preventDefault();
   page = 1;
   searchValue = searchInput.value;
@@ -30,15 +34,15 @@ async function Images(event) {
   loader.style.display = 'none';
 
   try {
-    const data = await getImages(searchValue);
+    const data = await pixaApiService.searchImages(searchValue, page);
 
     if (data.hits.length === 0 || searchValue === '') {
       notifyFailure(
         'Sorry, there are no images matching your search query. Please try again.'
       );
     } else {
-      notifySuccess(`Hooray! We found ${data.totalHits} images.`);
-      createMarkup(data);
+      Notify.success(`Hooray! We found ${data.totalHits} images.`);
+      displayGallery(data);
       lightbox.refresh();
     }
   } catch (err) {
@@ -46,7 +50,7 @@ async function Images(event) {
   }
 }
 
-searchForm.addEventListener('submit', Images);
+searchForm.addEventListener('submit', imagesSearch);
 
 const displayGallery = results => {
   const markup = results.hits
@@ -82,9 +86,3 @@ const displayGallery = results => {
   gallery.insertAdjacentHTML('beforeend', markup);
   lightbox.refresh();
 };
-
-// async function LoadMore() {
-//     page = 1;
-//   loader.style.display = 'none';
-// }
-// LoadMore.addEventListener('click', onClickLoadMore);
