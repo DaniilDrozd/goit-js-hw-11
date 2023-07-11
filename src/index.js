@@ -22,7 +22,6 @@ function notifyFailure(message) {
 }
 
 async function Images(event) {
-  loader.style.display = 'block';
   event.preventDefault();
   page = 1;
   searchValue = searchInput.value;
