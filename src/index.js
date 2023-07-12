@@ -7,8 +7,8 @@ const searchForm = document.querySelector('.search-form');
 const searchInput = document.querySelector('input');
 const gallery = document.querySelector('.gallery');
 const loader = document.querySelector('.loader');
+const buttonLoadMore = document.querySelector('.load-more');
 
-let buttonLoadMore = document.querySelector('.load-more');
 let searchValue = '';
 let page = 1;
 let totalImages = 0;
@@ -18,7 +18,6 @@ const lightbox = new SimpleLightbox('.gallery a', {
   animationSpeed: 250,
   captionPosition: 'bottom',
 });
-
 const pixaApiService = new PixaApiService();
 
 function notifyFailure(message) {
@@ -31,7 +30,7 @@ async function imagesSearch(event) {
   searchValue = searchInput.value;
   gallery.innerHTML = '';
   totalImages = 0;
-  loader.style.display = 'none';
+  buttonLoadMore.classList.add('is-hidden');
 
   try {
     const data = await pixaApiService.searchImages(searchValue, page);
@@ -44,6 +43,7 @@ async function imagesSearch(event) {
       Notify.success(`Hooray! We found ${data.totalHits} images.`);
       displayGallery(data);
       lightbox.refresh();
+      buttonLoadMore.classList.remove('is-hidden');
     }
   } catch (err) {
     console.log(err);
@@ -52,7 +52,7 @@ async function imagesSearch(event) {
 
 searchForm.addEventListener('submit', imagesSearch);
 
-const displayGallery = results => {
+function displayGallery(results) {
   const markup = results.hits
     .map(element => {
       return `
@@ -85,4 +85,26 @@ const displayGallery = results => {
 
   gallery.insertAdjacentHTML('beforeend', markup);
   lightbox.refresh();
-};
+}
+
+async function loadMoreImages() {
+  try {
+    page += 1;
+    buttonLoadMore.classList.add('is-hidden');
+
+    const data = await pixaApiService.searchImages(searchValue, page);
+
+    if (data.hits.length === 0) {
+      notifyFailure(
+        'Sorry, there are no more images matching your search query.'
+      );
+    } else {
+      displayGallery(data);
+      buttonLoadMore.classList.remove('is-hidden');
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+buttonLoadMore.addEventListener('click', loadMoreImages);
