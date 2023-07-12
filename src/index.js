@@ -95,12 +95,12 @@ async function loadMoreImages() {
     const data = await pixaApiService.searchImages(searchValue, page);
 
     if (data.hits.length === 0) {
-      notifyFailure(
-        'Sorry, there are no more images matching your search query.'
-      );
+      // buttonLoadMore.classList.add('is-hidden');
+      // Notify.info("We're sorry, but you've reached the end of search results.");
     } else {
       displayGallery(data);
-      buttonLoadMore.classList.remove('is-hidden');
+      buttonLoadMore.classList.add('is-hidden');
+      Notify.info("We're sorry, but you've reached the end of search results.");
     }
   } catch (error) {
     console.log(error);
